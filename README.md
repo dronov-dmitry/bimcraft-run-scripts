@@ -1,8 +1,8 @@
-# BIMCraft VM Python
+# BIMCraft Scripts
 
 **English** · [Русский](README_RU.md)
 
-**BIMCraft VM Python** is a BIMCraft plugin that runs small scripts inside the
+**BIMCraft Scripts** is a BIMCraft plugin that runs small scripts inside the
 application and saves you repetitive manual work.
 
 - Install page: <https://dronov-dmitry.github.io/bimcraft-run-scripts/>
@@ -84,7 +84,7 @@ running the command.
 
 ## Getting started
 
-After the restart, open **Manage → Plugins**. The list shows **BIMCraft VM Python** with
+After the restart, open **Manage → Plugins**. The list shows **BIMCraft Scripts** with
 two actions:
 
 - **Run Script** — run the script;

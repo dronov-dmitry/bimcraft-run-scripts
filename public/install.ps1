@@ -1,4 +1,4 @@
-# Installs the BIMCraft plugin bimcraft-vm-python 0.1.0 into the user's plugins folder.
+# Installs the BIMCraft plugin bimcraft-scripts 0.2.0 into the user's plugins folder.
 #
 # Run it from the delivery site:
 #     iwr -useb <site>/v1/install.ps1 | iex
@@ -16,10 +16,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$PluginId = 'bimcraft-vm-python'
-$PluginVersion = '0.1.0'
-$ArchiveUrl = 'https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.1.0/bimcraft-vm-python-0.1.0.zip'
-$ArchiveSha256 = '7af1b77ac4ceec1c75ed61fc2876e5c4b6cd8ca0697d6a1c0afb993c2d63b586'
+$PluginId = 'bimcraft-scripts'
+$PluginVersion = '0.2.0'
+$ArchiveUrl = 'https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip'
+$ArchiveSha256 = 'f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518'
 
 function Pause-IfInteractive {
     if ($env:BIMCRAFT_INSTALL_NO_PAUSE -ne '1') {

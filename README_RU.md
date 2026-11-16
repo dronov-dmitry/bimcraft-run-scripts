@@ -1,8 +1,8 @@
-# BIMCraft VM Python
+# BIMCraft Scripts
 
 [English](README.md) · **Русский**
 
-**BIMCraft VM Python** — плагин для BIMCraft, который выполняет небольшие скрипты
+**BIMCraft Scripts** — плагин для BIMCraft, который выполняет небольшие скрипты
 внутри приложения и избавляет от повторяющейся ручной работы.
 
 - Страница установки: <https://dronov-dmitry.github.io/bimcraft-run-scripts/>

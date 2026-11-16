@@ -1,20 +1,20 @@
 {
   "schema": 1,
   "plugin": {
-    "id": "bimcraft-vm-python",
-    "name": "BIMCraft VM Python",
+    "id": "bimcraft-scripts",
+    "name": "BIMCraft Scripts",
     "abi": 1
   },
-  "latest": "0.1.0",
+  "latest": "0.2.0",
   "versions": [
     {
-      "version": "0.1.0",
+      "version": "0.2.0",
       "released": "2026-11-16",
-      "notes": "First build: the language compiler, the bytecode VM and the plugin that runs scripts inside BIMCraft's sandbox.",
+      "notes": "Compiles and runs the documented BIMCraft scripting language inside the plugin sandbox.",
       "asset": {
-        "url": "https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.1.0/bimcraft-vm-python-0.1.0.zip",
-        "size": 761910,
-        "sha256": "7af1b77ac4ceec1c75ed61fc2876e5c4b6cd8ca0697d6a1c0afb993c2d63b586"
+        "url": "https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip",
+        "size": 761901,
+        "sha256": "f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518"
       }
     }
   ]

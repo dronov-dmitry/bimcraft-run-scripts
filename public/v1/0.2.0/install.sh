@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Installs the BIMCraft plugin bimcraft-vm-python 0.1.0 into the user's plugins folder.
+# Installs the BIMCraft plugin bimcraft-scripts 0.2.0 into the user's plugins folder.
 #
 # Run it from the delivery site:
 #     curl -fsSL <site>/v1/install.sh | bash
@@ -17,10 +17,10 @@
 
 set -euo pipefail
 
-PLUGIN_ID='bimcraft-vm-python'
-PLUGIN_VERSION='0.1.0'
-ARCHIVE_URL='https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.1.0/bimcraft-vm-python-0.1.0.zip'
-ARCHIVE_SHA256='7af1b77ac4ceec1c75ed61fc2876e5c4b6cd8ca0697d6a1c0afb993c2d63b586'
+PLUGIN_ID='bimcraft-scripts'
+PLUGIN_VERSION='0.2.0'
+ARCHIVE_URL='https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip'
+ARCHIVE_SHA256='f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518'
 
 WORK=''
 DESTINATION=''
