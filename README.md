@@ -87,6 +87,8 @@ running the command.
 After the restart, open **Manage → Plugins**. The list shows **BIMCraft Scripts** with
 two actions:
 
+- **Project Report** — show what the open project holds: name, units, levels, element
+  counts by category, warnings and the library size;
 - **Run Script** — run the script;
 - **Check Script** — check the script without running anything (useful before a run).
 
