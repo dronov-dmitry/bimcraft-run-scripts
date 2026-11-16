@@ -5,16 +5,16 @@
     "name": "BIMCraft Scripts",
     "abi": 1
   },
-  "latest": "0.2.0",
+  "latest": "0.2.1",
   "versions": [
     {
-      "version": "0.2.0",
+      "version": "0.2.1",
       "released": "2026-11-16",
       "notes": "Compiles and runs the documented BIMCraft scripting language inside the plugin sandbox.",
       "asset": {
-        "url": "https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip",
-        "size": 761895,
-        "sha256": "b6b8f2047b33828770590128353bec53fa0b9379bc7f9cdc31f636912e53995b"
+        "url": "https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.1/bimcraft-scripts-0.2.1.zip",
+        "size": 761898,
+        "sha256": "f97c40246d42bc749614ff56a78eb03b37b7f92cf318245c0645a82090270bda"
       }
     }
   ]
