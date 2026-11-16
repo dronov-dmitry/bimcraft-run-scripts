@@ -61,6 +61,8 @@ The scripts live on the page itself: installation does not depend on a separate 
 A pinned version has its own path — `.../v1/0.1.0/install.sh`; the page substitutes it
 when you pick a version from the list.
 
+When the installer asks, Enter alone accepts the default answer, yes.
+
 The installer downloads the plugin, checks that the file arrived complete and undamaged,
 and puts it into the right folder. If the plugin was already installed, the previous
 version is not deleted: it is set aside next to it, so you can go back to it.
