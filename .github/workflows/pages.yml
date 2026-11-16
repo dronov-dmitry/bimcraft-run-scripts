@@ -1,0 +1,50 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/**"
+      - "README.md"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - name: Check the artifact
+        run: |
+          set -euo pipefail
+          for file in index.html 404.html config.js favicon.svg robots.txt; do
+            test -s "public/$file" || { echo "missing or empty public/$file" >&2; exit 1; }
+          done
+          # .nojekyll is a marker and is intentionally empty.
+          test -f public/.nojekyll || { echo 'missing public/.nojekyll' >&2; exit 1; }
+          if find public \( -name '*.map' -o -name 'node_modules' -o -name '*.ts' \) -print | grep -q .; then
+            echo 'the artifact contains development files' >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

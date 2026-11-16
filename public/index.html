@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Install the BIMCraft VM Python plugin: a verified archive and a one-command installer for Linux, macOS and Windows."
+    />
+    <title>BIMCraft VM Python — install</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <p class="eyebrow">BIMCraft plugin delivery</p>
+      <h1 id="plugin-name">BIMCraft VM Python</h1>
+      <p class="lede">
+        Runs scripts written in the documented Python-like subset inside BIMCraft's plugin sandbox.
+        The installer checks the archive against its published SHA-256 before anything reaches the
+        plugins folder.
+      </p>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="install-title">
+        <div class="card-heading">
+          <h2 id="install-title">Install</h2>
+          <p id="status" class="status" role="status" aria-live="polite">Reading the release channel…</p>
+        </div>
+
+        <div id="empty" class="notice" hidden>
+          <h3>No builds yet</h3>
+          <p>
+            The delivery service is running, but no archive has been published. Until then this page
+            has nothing to install.
+          </p>
+        </div>
+
+        <div id="setup" class="notice" hidden>
+          <h3>The delivery service address is not set</h3>
+          <p>
+            This copy of the page does not know where the delivery worker lives. Set
+            <code>workerBase</code> in <code>config.js</code> to the address <code>wrangler deploy</code>
+            printed.
+          </p>
+        </div>
+
+        <div id="offline" class="notice notice-warning" hidden>
+          <h3>The release channel is unreachable</h3>
+          <p>
+            The page could not read the manifest from the delivery service. You can still install by
+            hand: download the archive from the repository releases and unpack it into the plugins
+            folder shown below.
+          </p>
+          <p><a id="offline-link" href="#">Open the releases page</a></p>
+        </div>
+
+        <div id="release" hidden>
+          <div class="release-line">
+            <span class="badge">ABI 1</span>
+            <span id="release-version" class="release-version"></span>
+            <span id="release-date" class="muted"></span>
+          </div>
+
+          <label class="field">
+            <span>Version</span>
+            <select id="version-select"></select>
+          </label>
+
+          <div class="tabs" role="tablist" aria-label="Operating system">
+            <button type="button" role="tab" id="tab-linux" data-os="linux" aria-controls="panel-install">
+              Linux
+            </button>
+            <button type="button" role="tab" id="tab-macos" data-os="macos" aria-controls="panel-install">
+              macOS
+            </button>
+            <button type="button" role="tab" id="tab-windows" data-os="windows" aria-controls="panel-install">
+              Windows
+            </button>
+          </div>
+
+          <div id="panel-install" role="tabpanel" aria-labelledby="tab-linux">
+            <p class="hint" id="command-hint"></p>
+            <div class="command">
+              <code id="command"></code>
+              <button type="button" id="copy-command" class="copy">Copy</button>
+            </div>
+            <p class="muted">
+              The script asks for confirmation, verifies the digest, moves an earlier install aside
+              and copies the new files. It never touches anything outside the plugins folder.
+            </p>
+          </div>
+
+          <p class="download-line">
+            <a id="download-link" class="button" href="#">Download the archive</a>
+            <span id="size" class="muted"></span>
+          </p>
+
+          <details class="digest">
+            <summary>Archive checksum</summary>
+            <p class="muted">
+              Compare this with the file you downloaded. The installer rejects an archive whose
+              SHA-256 differs.
+            </p>
+            <div class="command command-small">
+              <code id="digest"></code>
+              <button type="button" id="copy-digest" class="copy">Copy</button>
+            </div>
+          </details>
+
+          <details class="notes" id="notes-box">
+            <summary>Release notes</summary>
+            <p id="notes" class="notes-text"></p>
+          </details>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="where-title">
+        <h2 id="where-title">Where the files go</h2>
+        <p>
+          BIMCraft reads plugins at start-up. There is no in-application install button and no silent
+          update: this page only delivers files.
+        </p>
+        <table class="paths">
+          <tbody>
+            <tr>
+              <th scope="row">Linux</th>
+              <td><code>${XDG_CONFIG_HOME:-~/.config}/bimcraft/plugins</code></td>
+            </tr>
+            <tr>
+              <th scope="row">macOS</th>
+              <td><code>~/Library/Application Support/BIMCraft/plugins</code></td>
+            </tr>
+            <tr>
+              <th scope="row">Windows</th>
+              <td><code>%APPDATA%\BIMCraft\plugins</code></td>
+            </tr>
+            <tr>
+              <th scope="row">Override</th>
+              <td><code>BIMCRAFT_PLUGINS</code> (an empty value disables plugins)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted">
+          Restart BIMCraft after installing. The Plugins window lists what loaded and what was
+          refused, with the reason.
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="trust-title">
+        <h2 id="trust-title">What this protects, and what it does not</h2>
+        <ul class="trust">
+          <li>
+            The digest is served by the same service that serves the archive, so it protects against
+            a broken download, a proxy or a tampered CDN — not against the publisher.
+          </li>
+          <li>
+            BIMCraft itself does not sign or verify plugins. Installing a plugin is a decision to run
+            its code with the permissions its manifest asks for.
+          </li>
+          <li>
+            The plugin runs inside the WebAssembly sandbox: no files or network unless the host grants
+            them, with memory and time limits. That is a limit on accidents, not a security boundary
+            against a targeted attack.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p>
+        <a id="repo-link" href="#">Repository</a>
+        <span class="dot">·</span>
+        <a id="health-link" href="#">Service status</a>
+      </p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>
