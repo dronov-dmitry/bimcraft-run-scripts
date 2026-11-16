@@ -1,57 +1,165 @@
-# Фронтенд доставки плагина
+# BIMCraft VM Python
 
-Папка самодостаточна для публикации на **GitHub Pages**: статика без сборки, без
-зависимостей и без Node.js. **Это и есть корень git-репозитория для GitHub**:
-`scripts/publish-pages.py` инициализирует репозиторий здесь, а не в `delivery/`,
-поэтому бэкенд и корневые файлы в GitHub не попадают.
+**English** · [Русский](README_RU.md)
 
-```
-frontend/            ← корень git-репозитория; в GitHub уходит только он
-  public/            ← артефакт GitHub Pages, публикуется как есть
-    index.html
-    404.html         GitHub Pages отдаёт его на несуществующие адреса
-    styles.css
-    app.js           читает манифест у бэкенда, ничего не собирает
-    config.js        адрес бэкенда и ссылка на репозиторий; пишет scripts/publish-back.py
-    favicon.svg
-    robots.txt
-    .nojekyll        отключает обработку Jekyll
-  tools/preview.mjs  локальный просмотр; в публикацию не входит
-  .github/workflows/ pages.yml — единственный workflow репозитория
-  README.md
-```
+**BIMCraft VM Python** is a BIMCraft plugin that runs small scripts inside the
+application and saves you repetitive manual work.
 
-## Как публикуется
+- Install page: <https://dronov-dmitry.github.io/bimcraft-run-scripts/>
+- Installation is one command — see "Installation" below.
 
-`.github/workflows/pages.yml` внутри этой папки на каждый push в `main`,
-затрагивающий `public/**`:
+The first part of this file is for users, the second for whoever publishes the page.
 
-1. проверяет, что в `public/` есть обязательные файлы и нет файлов разработки;
-2. загружает `public/` артефактом Pages;
-3. деплоит.
+---
 
-В настройках репозитория должно стоять **Settings → Pages → Source: GitHub Actions**.
-`scripts/publish-pages.py` включает это через `gh api`, если `gh` авторизован.
+# Part 1. For users
 
-Адрес проекта: `https://<owner>.github.io/<repo>/`. Все ссылки в странице
-**относительные** — иначе на project pages они уйдут в корень домена и получат 404.
+## What it gives you
 
-Бэкенд (`delivery/backend`) в этом репозитории отсутствует: он деплоится локально
-через `scripts/publish-back.sh`.
+A script does for you what you usually repeat by hand.
 
-## Локальный просмотр
+- **Less manual work.** One run instead of dozens of identical actions: walk through
+  elements, pick the ones you need, count, call commands when a condition holds.
+- **Summaries and calculations over your model.** The script collects data, adds it up
+  and writes the result to the plugin log, where you read it.
+- **The same result for the same data.** A saved script can be run again and again — it
+  does not depend on the clock, randomness or machine settings.
+- **Safe to use.** The script runs inside BIMCraft in a restricted environment: it has no
+  access to the internet or files, and its memory and time are limited. A script error
+  stops only that run and shows what went wrong and where; the application keeps working.
+
+The plugin installs with one command, works right after BIMCraft restarts and needs no
+setup.
+
+## What it looks like in practice
+
+Say you regularly need a summary of model elements: how many there are, which values they
+carry, what changed since last time. Instead of walking through them by hand you run your
+script — it goes through the data, adds it up and writes the finished summary to the log.
+Next time you just run it again.
+
+## Installation
+
+1. Open the page <https://dronov-dmitry.github.io/bimcraft-run-scripts/>.
+2. Pick your system — Linux, macOS or Windows — and copy the command.
+3. Paste it into a terminal and press Enter.
+4. Confirm the installation and restart BIMCraft.
+
+**Linux and macOS:**
 
 ```bash
-pnpm frontend:dev      # из delivery/, http://127.0.0.1:4173
+curl -fsSL https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.sh | bash
 ```
 
-Для проверки против локального бэкенда поставьте в `public/config.js`
-`workerBase: "http://127.0.0.1:8787"` и запустите `pnpm backend:dev`.
-Страница понимает и `http`, и `https`.
+**Windows (PowerShell):**
+
+```powershell
+iwr -useb https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.ps1 | iex
+```
+
+The installer downloads the plugin, checks that the file arrived complete and undamaged,
+and puts it into the right folder. If the plugin was already installed, the previous
+version is not deleted: it is set aside next to it, so you can go back to it.
+
+BIMCraft plugins are not signed by a publisher: the integrity check protects against a
+broken download but does not confirm the author. Install the plugin only from a page you
+trust, as with any other plugin.
+
+Where the plugin goes:
+
+| System | Folder |
+|---|---|
+| Linux | `~/.config/bimcraft/plugins` |
+| macOS | `~/Library/Application Support/BIMCraft/plugins` |
+| Windows | `%APPDATA%\BIMCraft\plugins` |
+
+If you keep plugins elsewhere, set the folder in the `BIMCRAFT_PLUGINS` variable before
+running the command.
+
+## Getting started
+
+After the restart, open **Manage → Plugins**. The list shows **BIMCraft VM Python** with
+two actions:
+
+- **Run Script** — run the script;
+- **Check Script** — check the script without running anything (useful before a run).
+
+The result goes to the plugin log, which also shows where the script stopped if something
+went wrong.
+
+## Updating and removing
+
+- **Update** — the same install command as the first time. The page always offers the
+  current version; the previous one stays next to it as a backup.
+- **Disable** — in **Manage → Plugins**.
+- **Remove** — delete the plugin folder from the plugins folder (you may keep or delete
+  the backups).
+
+## If something went wrong
+
+- **The plugin is not in the list** — check that the installation finished without errors
+  and that BIMCraft was restarted.
+- **The plugin is listed but marked as refused** — the reason is shown next to it and in
+  the log; usually it is a BIMCraft version the plugin does not support.
+- **The script stopped with a message** — the message says what is wrong and where in the
+  script; fix it and run again. The model was not affected.
+
+---
+
+# Part 2. For whoever publishes the page
+
+The folder is self-contained for publishing on **GitHub Pages**: static files, no build,
+no dependencies and no Node.js. **It is the root of the git repository for GitHub**:
+`scripts/publish-pages.py` initializes the repository here, not in `delivery/`, so the
+backend and the root files never reach GitHub.
+
+```
+frontend/            ← the git repository root; only this folder goes to GitHub
+  public/            ← the GitHub Pages artifact, published as is
+    index.html
+    404.html         GitHub Pages serves it for addresses that do not exist
+    styles.css
+    app.js           reads the manifest from the backend, builds nothing
+    config.js        backend address and repository link; written by scripts/publish-back.py
+    favicon.svg
+    robots.txt
+    .nojekyll        turns off Jekyll processing
+  tools/preview.mjs  local preview; not published
+  .github/workflows/ pages.yml — the only workflow of the repository
+  README.md          README_RU.md — the English and the Russian texts
+```
+
+## How it is published
+
+`.github/workflows/pages.yml` in this folder, on every push to `main` that touches
+`public/**`:
+
+1. checks that `public/` holds the required files and no development files;
+2. uploads `public/` as the Pages artifact;
+3. deploys.
+
+The repository settings must say **Settings → Pages → Source: GitHub Actions**.
+`scripts/publish-pages.py` turns this on through `gh api` when `gh` is authorized.
+
+The project address is `https://<owner>.github.io/<repo>/`. Every link in the page is
+**relative** — otherwise on project pages it would go to the domain root and return 404.
+
+The backend (`delivery/backend`) is not in this repository: it is deployed locally through
+`scripts/publish-back.sh`.
+
+## Local preview
+
+```bash
+pnpm frontend:dev      # from delivery/, http://127.0.0.1:4173
+```
+
+To check against a local backend, set `workerBase: "http://127.0.0.1:8787"` in
+`public/config.js` and run `pnpm backend:dev`. The page understands both `http` and
+`https`.
 
 ## `config.js`
 
-Единственный файл, который меняется при развёртывании:
+The only file deployment changes:
 
 ```js
 window.BIMCRAFT_DELIVERY = {
@@ -60,32 +168,34 @@ window.BIMCRAFT_DELIVERY = {
 };
 ```
 
-Его перезаписывает `scripts/publish-back.py` после деплоя бэкенда. Релиз плагина этот файл
-не трогает: версии и digest приходят из `/v1/manifest.json`.
+`scripts/publish-back.py` rewrites it after the backend is deployed. A plugin release does
+not touch this file: versions and the digest come from `/v1/manifest.json`.
 
-## Правила
+## Rules
 
-- Сюда не добавлять: Node-код, сборку, `node_modules`, карты исходников, секреты и
-  адреса, которые нельзя публиковать.
-- Никаких абсолютных путей (`/styles.css`): сайт живёт в подпапке.
-- Данные из сети рендерятся только через `textContent` — `app.js` не собирает HTML
-  из ответа бэкенда.
-- Скрипты развёртывания живут **вне** этой папки: `../../scripts/`.
+- Do not add here: Node code, a build, `node_modules`, source maps, secrets or addresses
+  that must not be published.
+- No absolute paths (`/styles.css`): the site lives in a subfolder.
+- Data from the network is rendered only through `textContent` — `app.js` never builds
+  HTML from the backend's answer.
+- Deployment scripts live **outside** this folder: `../../scripts/`.
 
-## Свой домен
+## Custom domain
 
-1. Положить `CNAME` в `public/` с одним доменом в первой строке.
-2. Настроить DNS у регистратора (для apex — `A`/`AAAA` на адреса GitHub Pages, для
-   поддомена — `CNAME` на `<owner>.github.io`).
-3. **Settings → Pages → Custom domain**, включить HTTPS.
+1. Put `CNAME` in `public/` with a single domain on the first line.
+2. Configure DNS at the registrar (for an apex — `A`/`AAAA` to the GitHub Pages addresses,
+   for a subdomain — `CNAME` to `<owner>.github.io`).
+3. **Settings → Pages → Custom domain**, turn on HTTPS.
 
-Файл `CNAME` публикуется вместе с сайтом; без настроенного домена его добавлять нельзя.
+The `CNAME` file is published with the site; without a configured domain it must not be
+added.
 
-## Чек-лист перед публикацией
+## Checklist before publishing
 
-- [ ] `public/index.html`, `public/404.html`, `public/config.js` не пустые;
-- [ ] `config.js` содержит реальный адрес бэкенда, а не `example.workers.dev`;
-- [ ] в `public/` нет `.map`, `node_modules`, `.ts`;
-- [ ] ссылки относительные;
-- [ ] `404.html` открывается и ведёт на `./`;
-- [ ] страница в тёмной и светлой теме читается (цвета через `prefers-color-scheme`).
+- [ ] `public/index.html`, `public/404.html` and `public/config.js` are not empty;
+- [ ] `config.js` holds a real backend address, not `example.workers.dev`;
+- [ ] `public/` has no `.map`, `node_modules` or `.ts`;
+- [ ] the links are relative;
+- [ ] `404.html` opens and leads to `./`;
+- [ ] the page is readable in the dark and the light theme (colors through
+  `prefers-color-scheme`).
