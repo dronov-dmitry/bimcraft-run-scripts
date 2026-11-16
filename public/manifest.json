@@ -13,8 +13,8 @@
       "notes": "Compiles and runs the documented BIMCraft scripting language inside the plugin sandbox.",
       "asset": {
         "url": "https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip",
-        "size": 761901,
-        "sha256": "f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518"
+        "size": 761895,
+        "sha256": "b6b8f2047b33828770590128353bec53fa0b9379bc7f9cdc31f636912e53995b"
       }
     }
   ]

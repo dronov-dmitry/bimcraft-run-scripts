@@ -20,7 +20,7 @@ set -euo pipefail
 PLUGIN_ID='bimcraft-scripts'
 PLUGIN_VERSION='0.2.0'
 ARCHIVE_URL='https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip'
-ARCHIVE_SHA256='f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518'
+ARCHIVE_SHA256='b6b8f2047b33828770590128353bec53fa0b9379bc7f9cdc31f636912e53995b'
 
 WORK=''
 DESTINATION=''

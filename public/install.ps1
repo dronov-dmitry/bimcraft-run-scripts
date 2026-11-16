@@ -19,7 +19,7 @@ $ErrorActionPreference = 'Stop'
 $PluginId = 'bimcraft-scripts'
 $PluginVersion = '0.2.0'
 $ArchiveUrl = 'https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/download/v0.2.0/bimcraft-scripts-0.2.0.zip'
-$ArchiveSha256 = 'f5348a02fc7a3367259c55e6d130700e0a8ec6259c85c5b55dc5838323d52518'
+$ArchiveSha256 = 'b6b8f2047b33828770590128353bec53fa0b9379bc7f9cdc31f636912e53995b'
 
 function Pause-IfInteractive {
     if ($env:BIMCRAFT_INSTALL_NO_PAUSE -ne '1') {
