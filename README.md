@@ -48,14 +48,18 @@ Next time you just run it again.
 **Linux and macOS:**
 
 ```bash
-curl -fsSL https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.sh | bash
+curl -fsSL https://dronov-dmitry.github.io/bimcraft-run-scripts/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-iwr -useb https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.ps1 | iex
+iwr -useb https://dronov-dmitry.github.io/bimcraft-run-scripts/install.ps1 | iex
 ```
+
+The scripts live on the page itself: installation does not depend on a separate service.
+A pinned version has its own path — `.../v1/0.1.0/install.sh`; the page substitutes it
+when you pick a version from the list.
 
 The installer downloads the plugin, checks that the file arrived complete and undamaged,
 and puts it into the right folder. If the plugin was already installed, the previous
@@ -119,8 +123,12 @@ frontend/            ← the git repository root; only this folder goes to GitHu
     index.html
     404.html         GitHub Pages serves it for addresses that do not exist
     styles.css
-    app.js           reads the manifest from the backend, builds nothing
-    config.js        backend address and repository link; written by scripts/publish-back.py
+    app.js           reads manifest.json next to the page
+    config.js        repository link; written by scripts/build-site.py
+    manifest.json    the release channel; written by scripts/build-site.py
+    install.sh       the installer of the latest version; written by scripts/build-site.py
+    install.ps1
+    v1/<version>/    installers of pinned versions; written by scripts/build-site.py
     favicon.svg
     robots.txt
     .nojekyll        turns off Jekyll processing
@@ -130,6 +138,10 @@ frontend/            ← the git repository root; only this folder goes to GitHu
 ```
 
 ## How it is published
+
+The delivery files are built before publication: `scripts/build-site.sh` reads the channel
+and the templates and rewrites `manifest.json`, `install.sh`, `install.ps1`, `v1/**` and
+`config.js`.
 
 `.github/workflows/pages.yml` in this folder, on every push to `main` that touches
 `public/**`:
@@ -144,8 +156,10 @@ The repository settings must say **Settings → Pages → Source: GitHub Actions
 The project address is `https://<owner>.github.io/<repo>/`. Every link in the page is
 **relative** — otherwise on project pages it would go to the domain root and return 404.
 
-The backend (`delivery/backend`) is not in this repository: it is deployed locally through
-`scripts/publish-back.sh`.
+The delivery is static: `manifest.json`, the installers and `config.js` are built by
+`scripts/build-site.py` and published by `scripts/publish-pages.sh`. The Worker is not in
+this repository and takes no part in the installation; Cloudflare is kept for the user
+database that will come later.
 
 ## Local preview
 
@@ -159,20 +173,21 @@ To check against a local backend, set `workerBase: "http://127.0.0.1:8787"` in
 
 ## `config.js`
 
-The only file deployment changes:
+The repository link for the page footer:
 
 ```js
 window.BIMCRAFT_DELIVERY = {
-  workerBase: "https://<worker>.<subdomain>.workers.dev",
   repository: "https://github.com/<owner>/<repo>",
 };
 ```
 
-`scripts/publish-back.py` rewrites it after the backend is deployed. A plugin release does
-not touch this file: versions and the digest come from `/v1/manifest.json`.
+`scripts/build-site.py` writes it. The page needs no backend address: it reads versions
+and the digest from `manifest.json` next to it, and the installers from `v1/<version>/`.
 
 ## Rules
 
+- Generated files (`manifest.json`, `install.sh`, `install.ps1`, `config.js`, `v1/**`) are
+  not edited by hand: `scripts/build-site.py` writes them from `releases.json`.
 - Do not add here: Node code, a build, `node_modules`, source maps, secrets or addresses
   that must not be published.
 - No absolute paths (`/styles.css`): the site lives in a subfolder.

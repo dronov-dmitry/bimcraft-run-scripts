@@ -50,14 +50,18 @@
 **Linux и macOS:**
 
 ```bash
-curl -fsSL https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.sh | bash
+curl -fsSL https://dronov-dmitry.github.io/bimcraft-run-scripts/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-iwr -useb https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev/v1/install.ps1 | iex
+iwr -useb https://dronov-dmitry.github.io/bimcraft-run-scripts/install.ps1 | iex
 ```
+
+Скрипты лежат на самой странице: установка не зависит от отдельного сервиса. Для
+закреплённой версии есть путь с номером — `.../v1/0.1.0/install.sh`; страница
+подставляет его сама, когда вы выбираете версию в списке.
 
 Установщик сам скачает плагин, проверит, что файл скачался целиком и не повреждён, и
 положит его в нужную папку. Если плагин уже был установлен, прежняя версия не
@@ -121,8 +125,12 @@ frontend/            ← корень git-репозитория; в GitHub ух
     index.html
     404.html         GitHub Pages отдаёт его на несуществующие адреса
     styles.css
-    app.js           читает манифест у бэкенда, ничего не собирает
-    config.js        адрес бэкенда и ссылка на репозиторий; пишет scripts/publish-back.py
+    app.js           читает manifest.json рядом со страницей
+    config.js        ссылка на репозиторий; пишет scripts/build-site.py
+    manifest.json    канал релизов; пишет scripts/build-site.py
+    install.sh       установщик последней версии; пишет scripts/build-site.py
+    install.ps1
+    v1/<версия>/     установщики закреплённых версий; пишет scripts/build-site.py
     favicon.svg
     robots.txt
     .nojekyll        отключает обработку Jekyll
@@ -132,6 +140,10 @@ frontend/            ← корень git-репозитория; в GitHub ух
 ```
 
 ## Как публикуется
+
+Файлы доставки собираются перед публикацией: `scripts/build-site.sh` читает канал и
+шаблоны и переписывает `manifest.json`, `install.sh`, `install.ps1`, `v1/**` и
+`config.js`.
 
 `.github/workflows/pages.yml` внутри этой папки на каждый push в `main`,
 затрагивающий `public/**`:
@@ -146,8 +158,10 @@ frontend/            ← корень git-репозитория; в GitHub ух
 Адрес проекта: `https://<owner>.github.io/<repo>/`. Все ссылки в странице
 **относительные** — иначе на project pages они уйдут в корень домена и получат 404.
 
-Бэкенд (`delivery/backend`) в этом репозитории отсутствует: он деплоится локально
-через `scripts/publish-back.sh`.
+Доставка статическая: `manifest.json`, установщики и `config.js` собирает
+`scripts/build-site.py`, публикует `scripts/publish-pages.sh`. Worker в этом репозитории
+отсутствует и в установке не участвует; Cloudflare оставлен для будущей базы
+пользователей.
 
 ## Локальный просмотр
 
@@ -161,20 +175,21 @@ pnpm frontend:dev      # из delivery/, http://127.0.0.1:4173
 
 ## `config.js`
 
-Единственный файл, который меняется при развёртывании:
+Ссылка на репозиторий для подвала страницы:
 
 ```js
 window.BIMCRAFT_DELIVERY = {
-  workerBase: "https://<worker>.<subdomain>.workers.dev",
   repository: "https://github.com/<owner>/<repo>",
 };
 ```
 
-Его перезаписывает `scripts/publish-back.py` после деплоя бэкенда. Релиз плагина этот файл
-не трогает: версии и digest приходят из `/v1/manifest.json`.
+Его пишет `scripts/build-site.py`. Адрес бэкенда странице не нужен: версии и digest она
+читает из `manifest.json` рядом с собой, а установщики — из `v1/<версия>/`.
 
 ## Правила
 
+- Сгенерированные файлы (`manifest.json`, `install.sh`, `install.ps1`, `config.js`,
+  `v1/**`) руками не правят: их пишет `scripts/build-site.py` из `releases.json`.
 - Сюда не добавлять: Node-код, сборку, `node_modules`, карты исходников, секреты и
   адреса, которые нельзя публиковать.
 - Никаких абсолютных путей (`/styles.css`): сайт живёт в подпапке.
