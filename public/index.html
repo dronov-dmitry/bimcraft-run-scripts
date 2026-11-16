@@ -33,26 +33,17 @@
         <div id="empty" class="notice" hidden>
           <h3>No builds yet</h3>
           <p>
-            The delivery service is running, but no archive has been published. Until then this page
-            has nothing to install.
-          </p>
-        </div>
-
-        <div id="setup" class="notice" hidden>
-          <h3>The delivery service address is not set</h3>
-          <p>
-            This copy of the page does not know where the delivery worker lives. Set
-            <code>workerBase</code> in <code>config.js</code> to the address <code>wrangler deploy</code>
-            printed.
+            This page is ready, but no archive has been published yet. Until then it has
+            nothing to install.
           </p>
         </div>
 
         <div id="offline" class="notice notice-warning" hidden>
-          <h3>The release channel is unreachable</h3>
+          <h3>The release list is unreachable</h3>
           <p>
-            The page could not read the manifest from the delivery service. You can still install by
-            hand: download the archive from the repository releases and unpack it into the plugins
-            folder shown below.
+            The page could not read the release list from this site. You can still install by
+            hand: download the archive from the repository releases and unpack it into the
+            plugins folder shown below.
           </p>
           <p><a id="offline-link" href="#">Open the releases page</a></p>
         </div>
@@ -173,7 +164,7 @@
       <p>
         <a id="repo-link" href="#">Repository</a>
         <span class="dot">·</span>
-        <a id="health-link" href="#">Service status</a>
+        <a id="releases-link" href="#">Releases</a>
       </p>
     </footer>
 

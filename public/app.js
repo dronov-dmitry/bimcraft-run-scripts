@@ -1,14 +1,14 @@
-// The page reads the release channel from the worker and renders it. It never builds HTML
-// from the response: every value goes in as text, so a compromised channel cannot run
-// script here.
+// The page reads the release channel from manifest.json next to it and renders it. It
+// never builds HTML from the manifest: every value goes in as text, so a compromised
+// channel cannot run script here.
 
 (() => {
   "use strict";
 
   const config = window.BIMCRAFT_DELIVERY || {};
-  const workerBase = String(config.workerBase || "").replace(/\/+$/, "");
   const repository = String(config.repository || "");
-  const configured = /^https?:\/\/[^/]+/.test(workerBase) && !workerBase.includes(".example.");
+  // The site lives in a subfolder on project pages, so every address is relative.
+  const base = new URL(".", window.location.href).href.replace(/\/+$/, "");
 
   const state = { channel: null, version: null, os: detectOs() };
 
@@ -37,12 +37,13 @@
   }
 
   async function fetchChannel() {
-    if (!configured) return { error: "not-configured" };
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
     try {
-      const response = await fetch(`${workerBase}/v1/manifest.json`, {
+      // `no-cache` asks the CDN to revalidate, so a fresh release shows up at once.
+      const response = await fetch("manifest.json", {
         signal: controller.signal,
+        cache: "no-cache",
         headers: { accept: "application/json" },
       });
       if (!response.ok) return { error: `status ${response.status}` };
@@ -69,11 +70,16 @@
     return channel.versions.find((release) => release.version === version) || null;
   }
 
+  function installUrl(version) {
+    return `${base}/v1/${encodeURIComponent(version)}`;
+  }
+
   function commandFor(os, version) {
+    const folder = installUrl(version);
     if (os === "windows") {
-      return `iwr -useb ${workerBase}/v1/install.ps1?v=${version} | iex`;
+      return `iwr -useb ${folder}/install.ps1 | iex`;
     }
-    return `curl -fsSL ${workerBase}/v1/install.sh?v=${version} | bash`;
+    return `curl -fsSL ${folder}/install.sh | bash`;
   }
 
   function hintFor(os) {
@@ -127,8 +133,12 @@
     const dateNode = el("release-date");
     if (dateNode) dateNode.textContent = release.released ? `released ${release.released}` : "";
 
+    // The archive is hosted by GitHub Releases; only an https address is followed.
     const download = el("download-link");
-    if (download) download.href = `${workerBase}/v1/download/${encodeURIComponent(release.version)}`;
+    if (download) {
+      const url = release.asset && typeof release.asset.url === "string" ? release.asset.url : "";
+      download.href = /^https:\/\//.test(url) ? url : "#";
+    }
 
     const size = el("size");
     if (size) size.textContent = humanSize(release.asset && release.asset.size);
@@ -148,22 +158,17 @@
   }
 
   function render(result) {
-    if (!configured) {
-      setStatus("The delivery service address is not configured yet.");
-      show(el("setup"));
-      return;
-    }
     if (result.error) {
-      setStatus("The release channel is unreachable.");
+      setStatus("The release list could not be read.");
       const link = el("offline-link");
-      if (link) link.href = repository || "#";
+      if (link) link.href = repository ? `${repository}/releases` : "#";
       show(el("offline"));
       return;
     }
 
     const channel = result.channel;
     if (!channel || !Array.isArray(channel.versions) || channel.versions.length === 0) {
-      setStatus("The delivery service is running; no build is published yet.");
+      setStatus("No build has been published yet.");
       show(el("empty"));
       return;
     }
@@ -233,8 +238,8 @@
     const repoLink = el("repo-link");
     if (repoLink) repoLink.href = repository || "#";
 
-    const healthLink = el("health-link");
-    if (healthLink) healthLink.href = configured ? `${workerBase}/v1/health` : "#";
+    const releasesLink = el("releases-link");
+    if (releasesLink) releasesLink.href = repository ? `${repository}/releases` : "#";
   }
 
   function start() {

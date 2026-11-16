@@ -1,6 +1,5 @@
-// Written by scripts/publish-back.py: where the delivery backend lives and
-// where the repository is. A release of the plugin does not change this file.
+// Written by scripts/build-site.py: where the repository is. The site reads
+// manifest.json next to this file; a release does not change this link.
 window.BIMCRAFT_DELIVERY = {
-  workerBase: "https://bimcraft-plugin-delivery.dronov-dmitry-bim.workers.dev",
   repository: "https://github.com/dronov-dmitry/bimcraft-run-scripts",
 };
