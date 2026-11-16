@@ -79,10 +79,10 @@ confirm() {
         return 0
     fi
     [ -r /dev/tty ] || fail "there is no terminal to confirm the install; set BIMCRAFT_INSTALL_YES=1 to install without a prompt"
-    printf 'Install %s %s into %s? [y/N] ' "$PLUGIN_ID" "$PLUGIN_VERSION" "$target" > /dev/tty
+    printf 'Install %s %s into %s? [Y/n] ' "$PLUGIN_ID" "$PLUGIN_VERSION" "$target" > /dev/tty
     read -r answer < /dev/tty || fail 'no confirmation was read'
     case "$answer" in
-        y | Y | yes | YES) return 0 ;;
+        '' | y | Y | yes | YES) return 0 ;;
         *) fail 'the user cancelled the install' ;;
     esac
 }

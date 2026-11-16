@@ -49,7 +49,11 @@ Write-Host "Folder:  $plugins"
 Write-Host "Archive: $ArchiveUrl"
 
 if ($env:BIMCRAFT_INSTALL_YES -ne '1') {
-    $answer = Read-Host "Install $PluginId $PluginVersion into ${plugins}? [y/N]"
+    $answer = Read-Host "Install $PluginId $PluginVersion into ${plugins}? [Y/n]"
+    if ([string]::IsNullOrWhiteSpace($answer)) {
+        # Enter alone means yes: the default is marked in the prompt.
+        $answer = 'y'
+    }
     if ($answer -notmatch '^(y|yes)$') {
         Fail 'the user cancelled the install'
     }
