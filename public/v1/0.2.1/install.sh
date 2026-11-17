@@ -11,7 +11,9 @@
 #     BIMCRAFT_INSTALL_NO_PAUSE set to 1 to skip the final pause
 #
 # The archive is checked against its SHA-256 before anything lands where the application
-# reads plugins. An earlier install of the same plugin is moved aside, not deleted.
+# reads plugins. Every earlier copy of the same plugin is removed from the plugins folder:
+# BIMCraft reads every subfolder that has plugin.json, so a leftover copy makes it report
+# a second plugin with the same id as broken.
 #
 # Requires Bash 4+, curl, and unzip or bsdtar.
 
@@ -23,6 +25,7 @@ ARCHIVE_URL='https://github.com/dronov-dmitry/bimcraft-run-scripts/releases/down
 ARCHIVE_SHA256='f97c40246d42bc749614ff56a78eb03b37b7f92cf318245c0645a82090270bda'
 
 WORK=''
+STAGING=''
 DESTINATION=''
 
 say() {
@@ -37,6 +40,9 @@ fail() {
 on_exit() {
     local status=$?
     trap - EXIT
+    if [ -n "$STAGING" ] && [ -d "$STAGING" ]; then
+        rm -rf "$STAGING"
+    fi
     if [ -n "$WORK" ] && [ -d "$WORK" ]; then
         rm -rf "$WORK"
     fi
@@ -99,6 +105,46 @@ digest_of() {
     fi
 }
 
+# Reads the value of the first "id" in a manifest. The host puts the plugin id before the
+# functions, and a function id is never the plugin id, so the first match is the right one.
+manifest_id() {
+    awk '
+        match($0, /"id"[[:space:]]*:[[:space:]]*"[^"]*"/) {
+            value = substr($0, RSTART, RLENGTH)
+            sub(/^.*:[[:space:]]*"/, "", value)
+            sub(/"$/, "", value)
+            print value
+            exit
+        }
+    ' "$1" 2>/dev/null || true
+}
+
+owns_plugin() {
+    local folder=$1
+    [ -f "$folder/plugin.json" ] || return 1
+    [ "$(manifest_id "$folder/plugin.json")" = "$PLUGIN_ID" ]
+}
+
+# Removes every earlier copy of this plugin from the plugins folder. A copy left next to the
+# new one is read as a second plugin with the same id, and BIMCraft lists it as broken.
+remove_earlier_installs() {
+    local target=$1
+    local path=''
+    local name=''
+    while IFS= read -r -d '' path; do
+        [ "$path" != "$STAGING" ] || continue
+        name=${path##*/}
+        case "$name" in
+            "$PLUGIN_ID" | "$PLUGIN_ID".backup-* | "$PLUGIN_ID".old-*) ;;
+            *)
+                owns_plugin "$path" || continue
+                ;;
+        esac
+        rm -rf -- "$path"
+        say "Removed the earlier install: $path"
+    done < <(find "$target" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+}
+
 main() {
     require curl
     local unpacker=''
@@ -141,12 +187,17 @@ main() {
 
     mkdir -p "$target"
     DESTINATION="$target/$PLUGIN_ID"
-    if [ -e "$DESTINATION" ]; then
-        local backup="$DESTINATION.backup-$(date +%Y%m%d-%H%M%S)"
-        mv "$DESTINATION" "$backup"
-        say "The earlier install was moved to $backup"
-    fi
-    mv "$unpacked" "$DESTINATION"
+
+    # The new copy waits inside the plugins folder under a temporary name, so the final
+    # move is a rename on the same filesystem: either the new install is in place or the
+    # folder is unchanged.
+    STAGING="$target/.tmp-install-$PLUGIN_ID-$$"
+    rm -rf -- "$STAGING"
+    mv "$unpacked" "$STAGING"
+
+    remove_earlier_installs "$target"
+    mv "$STAGING" "$DESTINATION"
+    STAGING=''
 
     say ''
     say "Installed: $DESTINATION"

@@ -9,7 +9,9 @@
 #     BIMCRAFT_INSTALL_NO_PAUSE set to 1 to skip the final pause
 #
 # The archive is checked against its SHA-256 before anything lands where the application
-# reads plugins. An earlier install of the same plugin is moved aside, not deleted.
+# reads plugins. Every earlier copy of the same plugin is removed from the plugins folder:
+# BIMCraft reads every subfolder that has plugin.json, so a leftover copy makes it report
+# a second plugin with the same id as broken.
 
 #Requires -Version 5.1
 
@@ -31,6 +33,28 @@ function Fail([string] $Message) {
     Write-Host "ERROR: $Message" -ForegroundColor Red
     Pause-IfInteractive
     exit 1
+}
+
+# Reads the plugin id from a folder's plugin.json; $null when the file is absent or broken,
+# so a folder that only looks like a plugin is left alone.
+function Get-PluginId([string] $Folder) {
+    $manifest = Join-Path $Folder 'plugin.json'
+    if (-not (Test-Path -Path $manifest -PathType Leaf)) {
+        return $null
+    }
+    try {
+        $json = Get-Content -Path $manifest -Raw | ConvertFrom-Json
+    } catch {
+        return $null
+    }
+    if ($null -eq $json) {
+        return $null
+    }
+    $property = $json.PSObject.Properties['id']
+    if ($null -eq $property) {
+        return $null
+    }
+    return [string] $property.Value
 }
 
 $plugins = [Environment]::GetEnvironmentVariable('BIMCRAFT_PLUGINS')
@@ -61,6 +85,7 @@ if ($env:BIMCRAFT_INSTALL_YES -ne '1') {
 
 $work = Join-Path ([System.IO.Path]::GetTempPath()) ('bimcraft-install-' + [System.Guid]::NewGuid().ToString('n'))
 $destination = Join-Path $plugins $PluginId
+$staging = Join-Path $plugins ('.tmp-install-' + $PluginId + '-' + [System.Guid]::NewGuid().ToString('n'))
 
 New-Item -ItemType Directory -Path $work | Out-Null
 try {
@@ -80,13 +105,36 @@ try {
     }
 
     New-Item -ItemType Directory -Path $plugins -Force | Out-Null
-    if (Test-Path $destination) {
-        $backup = "$destination.backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
-        Move-Item -Path $destination -Destination $backup
-        Write-Host "The earlier install was moved to $backup"
+
+    # The new copy waits inside the plugins folder under a temporary name, so the final
+    # move is a rename on the same volume: either the new install is in place or the
+    # folder is unchanged.
+    if (Test-Path $staging) {
+        Remove-Item -Path $staging -Recurse -Force
     }
-    Move-Item -Path $unpacked -Destination $destination
+    Move-Item -Path $unpacked -Destination $staging
+
+    # A copy left next to the new one is read as a second plugin with the same id, and
+    # BIMCraft lists it as broken. Remove the old folder, its backups, and any folder
+    # whose plugin.json declares the same id.
+    $earlier = @(Get-ChildItem -Path $plugins -Directory -Force | Where-Object {
+        $_.FullName -ne $staging -and (
+            $_.Name -eq $PluginId -or
+            $_.Name -like "${PluginId}.backup-*" -or
+            $_.Name -like "${PluginId}.old-*" -or
+            (Get-PluginId $_.FullName) -eq $PluginId
+        )
+    })
+    foreach ($folder in $earlier) {
+        Remove-Item -Path $folder.FullName -Recurse -Force
+        Write-Host "Removed the earlier install: $($folder.FullName)"
+    }
+
+    Move-Item -Path $staging -Destination $destination
 } finally {
+    if (Test-Path $staging) {
+        Remove-Item -Path $staging -Recurse -Force -ErrorAction SilentlyContinue
+    }
     if (Test-Path $work) {
         Remove-Item -Path $work -Recurse -Force -ErrorAction SilentlyContinue
     }

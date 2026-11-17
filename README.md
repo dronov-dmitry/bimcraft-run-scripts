@@ -98,10 +98,11 @@ went wrong.
 ## Updating and removing
 
 - **Update** — the same install command as the first time. The page always offers the
-  current version; the previous one stays next to it as a backup.
+  current version; the installer removes every earlier copy of the plugin from the
+  plugins folder, so a leftover copy is not listed as a second, broken plugin.
 - **Disable** — in **Manage → Plugins**.
-- **Remove** — delete the plugin folder from the plugins folder (you may keep or delete
-  the backups).
+- **Remove** — delete the plugin folder from the plugins folder. The installer has
+  already removed the older copies during the last update.
 
 ## If something went wrong
 
